@@ -391,7 +391,7 @@
   }
   ],
   "paths": [
-  "face_landmark_68_tiny_model-shard1"
+  "face_landmark_68_tiny_model.bin"
   ]
   }
   ]

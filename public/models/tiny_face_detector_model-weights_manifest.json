@@ -267,7 +267,7 @@
   }
   ],
   "paths": [
-  "tiny_face_detector_model-shard1"
+  "tiny_face_detector_model.bin"
   ]
   }
   ]
