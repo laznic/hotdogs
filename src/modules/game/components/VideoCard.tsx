@@ -4,6 +4,8 @@ import * as faceapi from '@vladmandic/face-api';
 import takeLast from 'ramda/src/takeLast'
 import update from 'ramda/src/update'
 import append from 'ramda/src/append'
+import { useTimer } from 'react-timer-hook'
+import addSeconds from 'date-fns/addSeconds'
 
 const MODEL_URL = '/models'
 
@@ -13,6 +15,7 @@ export default function VideoCard() {
   const hotDogBase = { bites: 0, finished: false }
   const [hotDogs, setHotDogs] = useState([hotDogBase])
   const currentDogIndex = useRef(0)
+  const time = useRef(addSeconds(new Date(), 30))
 
   async function onPlay () {
       const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 })
@@ -50,6 +53,8 @@ export default function VideoCard() {
 
   useAnimationFrame(() => onPlay(), hotDogs)
 
+  const { seconds } = useTimer({ expiryTimestamp: time.current })
+
   async function loadModels () {
     await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
     await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
@@ -66,10 +71,15 @@ export default function VideoCard() {
 
     load()
   }, [])
+  
+  if (seconds === 0) {
+    return <p>Time is up!</p>
+  }
 
   return (
     <Card>
       <video ref={videoElement} autoPlay muted playsInline />
+      {seconds} second(s) left
       {hotDogs.map((hotDog: Record<string, unknown>, index: number) => <p key={index}>bites: {hotDog.bites} - finished: {hotDog.finished ? 'true' : 'false'}</p>)}
     </Card>
   )
