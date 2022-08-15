@@ -7,7 +7,7 @@ const customStyles = css`
     height: 100%;
   }
   body {
-    ${tw`antialiased bg-rose-200`}
+    ${tw`antialiased bg-gradient-to-b from-rose-300 to-red-400`}
   }
 `
 

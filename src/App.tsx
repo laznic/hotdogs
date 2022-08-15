@@ -15,6 +15,7 @@ function App() {
 const Main = tw.main`
   container
   mx-auto
+  relative
 `
 
 export default App
