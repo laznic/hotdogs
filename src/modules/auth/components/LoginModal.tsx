@@ -12,30 +12,31 @@ export default function LoginModal () {
 
   return (
     <Wrapper>
-      <LoginButton>Login via Twitter</LoginButton>
+      <LoginButton onClick={handleLogin}>Login via Twitter to create a game</LoginButton>
     </Wrapper>
   ) 
 }
 
 const Wrapper = tw.div`
-  bg-rose-50
-  rounded-xl
-  shadow-2xl
-  p-8
+  text-center
+`
+
+const LoginButton = tw.button`
+  bg-sky-500
+  rounded-lg
+  shadow-xl
+  px-8
+  py-5
   w-fit
   mx-auto
   flex
   items-center
   justify-center
   border
-  border-white
-`
-
-const LoginButton = tw.button`
-  px-4
-  py-2
-  rounded
-  bg-sky-500
+  border-sky-400
   text-white
-  hocus:bg-sky-600
+  font-bold
+  hocus:-translate-y-1
+  hocus:shadow-2xl
+  transition-all
 `

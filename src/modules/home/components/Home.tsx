@@ -4,21 +4,13 @@ import tw from 'twin.macro'
 
 import { useSupabase } from '../../../contexts/SupabaseContext'
 import LoginModal from '../../auth/components/LoginModal'
+import CreateGameModal from '../../game/components/CreateGameModal'
 
 export default function Home() {
   const { client, session } = useSupabase()
   const navigate = useNavigate()
   const [publicGames, setPublicGames] = useState([])
-
-  async function handleLogin () {
-    await client.auth.signIn({
-        provider: 'twitter'
-     })
-  }
-
-  async function handleLogout () {
-    await client.auth.signOut()
-  }
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   async function createRoom () {
     const { data, error } = await client.from('games').insert({
@@ -64,12 +56,36 @@ export default function Home() {
     fetchPublicGames()
   }, [])
 
+  function toggleCreateModal () {
+    setShowCreateModal(!showCreateModal)
+  }
+
   return (
-    <>
-      <p>{session ? <>{`Welcome ${session.user?.user_metadata.preferred_username}`}<button onClick={handleLogout}>Logout</button></> : <button onClick={handleLogin}>Login</button>}</p>
-      {session && <button onClick={createRoom}>Create game</button>}
+    <div className="text-center">
+      <h1 className="text-6xl font-black text-white drop-shadow-lg mb-4">
+        The Hot Dog Game
+      </h1>
+
+      <p className="mb-4">
+        The rules are simple: 
+        <span className="font-bold">
+          &nbsp;eat as many hot dogs as you can in 15 seconds.
+        </span>
+      </p>
+
+      {session && <CreateGameButton onClick={toggleCreateModal}>
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+        </svg>
+        Create game
+        </CreateGameButton>}
       {!session && <LoginModal />}
-      <section className="mt-8">
+
+      {showCreateModal && (
+        <CreateGameModal isOpen={showCreateModal} toggleModal={toggleCreateModal} />
+      )}
+      
+      <section className="mt-16">
         <h3 className="text-3xl font-bold text-center text-rose-900">Or check out some of the public games 👇</h3>
         <GameList>
           {publicGames.map((game) => {
@@ -110,7 +126,7 @@ export default function Home() {
           })} 
         </GameList>
       </section>
-    </>
+    </div>
   )
 }
 
@@ -189,4 +205,26 @@ const WatchButton = tw(Link)`
   hocus:-translate-y-1
   transition-all
   hocus:text-slate-500
+`
+
+const CreateGameButton = tw.button`
+  inline-flex
+  items-center
+  rounded-lg
+  bg-violet-500
+  border
+  border-solid
+  border-violet-600
+  px-10
+  pl-6
+  py-4
+  text-lg
+  font-bold
+  text-violet-50
+  shadow-md
+  hocus:-translate-y-1
+  transition-all
+  hocus:text-white
+  hocus:shadow-lg
+  active:bg-violet-700
 `
