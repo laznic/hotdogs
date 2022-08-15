@@ -10,8 +10,8 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-export async function rpcQuery(rpc: string) {
-  return await supabase.rpc(rpc)
+export async function rpcQuery(rpc: string, params?: object) {
+  return await supabase.rpc(rpc, params)
 }
 
 const SupabaseContext = React.createContext<SupabaseContextType>(null!)
