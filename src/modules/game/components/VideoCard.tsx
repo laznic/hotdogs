@@ -6,20 +6,32 @@ import update from 'ramda/src/update'
 import append from 'ramda/src/append'
 import { useTimer } from 'react-timer-hook'
 import addSeconds from 'date-fns/addSeconds'
+import { useSupabase } from '../../../contexts/SupabaseContext';
+import { useParams } from 'react-router-dom';
 
 const MODEL_URL = '/models'
 
 export default function VideoCard() {
-  const videoElement = useRef(null)
-  const mouthState = useRef(null)
+  const videoElement = useRef<HTMLVideoElement>(null)
+  const mouthState = useRef('closed')
   const hotDogBase = { bites: 0, finished: false }
   const [hotDogs, setHotDogs] = useState([hotDogBase])
   const currentDogIndex = useRef(0)
   const time = useRef(addSeconds(new Date(), 30))
+  const [participants, setParticipants] = useState([])
+  const { client } = useSupabase()
+  const session = client.auth.session()
+  const params = useParams()
+
+  const gameSubscription = useRef(client.from(`games_players:game=eq.${params?.id}`)
+    .on('INSERT', handlePlayerJoin)
+    .on('UPDATE', handleGameState)
+    .subscribe()
+  )
 
   async function onPlay () {
       const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 })
-      const result = await faceapi.detectSingleFace(videoElement.current, options).withFaceLandmarks(true)
+      const result = await faceapi.detectSingleFace(videoElement.current as faceapi.TNetInput, options).withFaceLandmarks(true)
 
       if (result) {
         const mouth = result.landmarks.getMouth()
@@ -45,11 +57,36 @@ export default function VideoCard() {
             }
 
             setHotDogs(updatedDogs)
+            
             mouthState.current = 'closed'
+            
+            await client.from('games_players').update({
+              hotdogs: updatedDogs 
+            })
+            .match({ user_id: session?.user?.id, game: params?.id })
           }
         }
       }
   }
+
+  function handlePlayerJoin(payload: Record<string, unknown>) {
+    const { new: data } = payload
+    setParticipants(participants.concat([data]))
+  }
+
+  function handleGameState(payload: Record<string, unknown>) {
+    const { new: data } = payload
+    const participantIndex = participants.findIndex((participant) => participant.id === data.id)
+    const updatedParticipants = update(participantIndex, data, participants)
+
+    setParticipants(updatedParticipants)
+  }
+
+  useEffect(function subscribeToGame() {
+    return () => {
+      gameSubscription.current && client.removeSubscription(gameSubscription.current)
+    }
+  }, [])
 
   useAnimationFrame(() => onPlay(), hotDogs)
 
@@ -65,8 +102,11 @@ export default function VideoCard() {
   useEffect(function loadVideo () {
     async function load() {
       loadModels()
-      const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
-      videoElement.current.srcObject = stream
+
+      if (videoElement.current) {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
+        videoElement.current.srcObject = stream
+      }
     }
 
     load()
