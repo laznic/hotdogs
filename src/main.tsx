@@ -4,10 +4,13 @@ import GlobalStyles from './GlobalStyles'
 import App from './App'
 import './style.css'
 import { BrowserRouter } from 'react-router-dom'
+import SupabaseProvider from './contexts/SupabaseContext'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-    <BrowserRouter>
+  <BrowserRouter>
+    <SupabaseProvider>
       <GlobalStyles />
       <App />
-    </BrowserRouter>
+    </SupabaseProvider>
+  </BrowserRouter>
 )
