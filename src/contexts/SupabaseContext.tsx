@@ -1,9 +1,10 @@
-import React from 'react'
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import React, { useEffect, useState } from 'react'
+import { createClient, Session, SupabaseClient } from '@supabase/supabase-js'
 
 interface SupabaseContextType {
   client: SupabaseClient;
-  rpcQuery: any
+  rpcQuery: any,
+  session: Session | null
 }
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -17,11 +18,21 @@ export async function rpcQuery(rpc: string, params?: object) {
 const SupabaseContext = React.createContext<SupabaseContextType>(null!)
 
 export default function SupabaseProvider({ children }: { children: React.ReactNode }) {
+  const [session, setSession] = useState<Session | null>(null)
 
   const value = {
     client: supabase,
-    rpcQuery
+    rpcQuery,
+    session
   }
+
+  useEffect(() => {
+    setSession(supabase.auth.session())
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+  }, [])
 
   return (
     <SupabaseContext.Provider value={value}>
