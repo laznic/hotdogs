@@ -9,7 +9,9 @@ export default [
     element: <Layout />,
     children: [
       { index: true, element: <Home /> },
-      { path: "/room", element: <Room /> },
+      { path: "/rooms/:id", element: <Room /> },
+      { path: "/rooms/:id/:code", element: <Room /> },
+      { path: "/rooms/:id/view", element: <Room viewMode /> },
       { path: "*", element: <NoMatch /> },
     ],
   },
