@@ -1,14 +1,20 @@
 import { useRoutes } from 'react-router-dom'
 import routes from './modules/navigation/routes'
+import tw from 'twin.macro'
 
 function App() {
   const element = useRoutes(routes)
 
   return (
-    <div>
+    <Main>
       {element}
-    </div>
+    </Main>
   )
 }
+
+const Main = tw.main`
+  container
+  mx-auto
+`
 
 export default App
