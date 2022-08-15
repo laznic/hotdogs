@@ -19,13 +19,19 @@ export default function VideoCard() {
   const currentDogIndex = useRef(0)
   const time = useRef(addSeconds(new Date(), 30))
   const [participants, setParticipants] = useState([])
-  const { client } = useSupabase()
+  const [startingGame, setStartingGame] = useState(false)
+  const [gameStatus, setGameStatus] = useState('OPEN')
+  const { client, rpcQuery } = useSupabase()
   const session = client.auth.session()
   const params = useParams()
 
-  const gameSubscription = useRef(client.from(`games_players:game=eq.${params?.id}`)
-    .on('INSERT', handlePlayerJoin)
+  const gameSubscription = useRef(client.from(`games:id=eq.${params?.id}`)
     .on('UPDATE', handleGameState)
+    .subscribe()
+  )
+  const participantsSubscription = useRef(client.from(`games_players:game=eq.${params?.id}`)
+    .on('INSERT', handlePlayerJoin)
+    .on('UPDATE', handlePlayerUpdate)
     .subscribe()
   )
 
@@ -69,28 +75,31 @@ export default function VideoCard() {
       }
   }
 
-  function handlePlayerJoin(payload: Record<string, unknown>) {
-    const { new: data } = payload
-    setParticipants(participants.concat([data]))
+  function handlePlayerJoin (payload: Record<string, unknown>) {
+    setParticipants(participants.concat([payload.new]))
   }
 
-  function handleGameState(payload: Record<string, unknown>) {
-    const { new: data } = payload
-    const participantIndex = participants.findIndex((participant) => participant.id === data.id)
-    const updatedParticipants = update(participantIndex, data, participants)
+  function handlePlayerUpdate (payload: Record<string, unknown>) {
+    const participantIndex = participants.findIndex((participant) => participant.id === payload.new.id)
+    const updatedParticipants = update(participantIndex, payload.new, participants)
 
     setParticipants(updatedParticipants)
   }
 
-  useEffect(function subscribeToGame() {
+  function handleGameState (payload: Record<string, unknown>) {
+    setGameStatus(payload.new.status)
+  }
+
+  useEffect(function removeSubscriptions () {
     return () => {
       gameSubscription.current && client.removeSubscription(gameSubscription.current)
+      participantsSubscription.current && client.removeSubscription(participantsSubscription.current)
     }
   }, [])
 
   useAnimationFrame(() => onPlay(), hotDogs)
 
-  const { seconds } = useTimer({ expiryTimestamp: time.current })
+  const { seconds } = useTimer({ expiryTimestamp: time.current, autoStart: false })
 
   async function loadModels () {
     await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
@@ -111,6 +120,20 @@ export default function VideoCard() {
 
     load()
   }, [])
+
+  async function endGame() {
+    await rpcQuery('end_game', { id: params?.id })
+  }
+
+  useEffect(function handleEndGame() {
+    if (seconds === 0 && gameStatus === 'IN_PROGRESS') {
+      endGame()
+    }
+  }, [seconds, gameStatus])
+
+  async function startGame () {
+    await rpcQuery('start_game', { id: params?.id })
+  }
   
   if (seconds === 0) {
     return <p>Time is up!</p>
@@ -118,6 +141,7 @@ export default function VideoCard() {
 
   return (
     <Card>
+      <button onClick={startGame}>Start game</button>
       <video ref={videoElement} autoPlay muted playsInline />
       {seconds} second(s) left
       {hotDogs.map((hotDog: Record<string, unknown>, index: number) => <p key={index}>bites: {hotDog.bites} - finished: {hotDog.finished ? 'true' : 'false'}</p>)}
