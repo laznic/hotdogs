@@ -8,9 +8,6 @@ export default function Layout() {
       <Nav>
         <Logo to="/">🌭</Logo>
         <NavLinks>
-          <li>
-            <Link to="/rooms">Room</Link>
-          </li>
         </NavLinks>
       </Nav>
 
