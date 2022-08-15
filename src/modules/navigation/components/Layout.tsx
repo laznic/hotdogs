@@ -1,22 +1,30 @@
+import React from 'react'
 import { Outlet, Link } from "react-router-dom";
+import tw from 'twin.macro'
 
 export default function Layout() {
   return (
-    <div>
-      <nav>
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
+    <>
+      <Nav>
+        <Logo to="/">🌭</Logo>
+        <NavLinks>
           <li>
             <Link to="/rooms">Room</Link>
           </li>
-        </ul>
-      </nav>
-
-      <hr />
+        </NavLinks>
+      </Nav>
 
       <Outlet />
-    </div>
+    </>
   );
 }
+
+const Nav = tw.nav``
+const NavLinks = tw.ul`
+  flex
+  items-center
+`
+const Logo = tw(Link)`
+  lg:text-5xl
+  text-4xl
+`
