@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import tw from 'twin.macro'
 
 import { useSupabase } from '../../../contexts/SupabaseContext'
@@ -8,24 +8,8 @@ import CreateGameModal from '../../game/components/CreateGameModal'
 
 export default function Home() {
   const { client, session } = useSupabase()
-  const navigate = useNavigate()
   const [publicGames, setPublicGames] = useState([])
   const [showCreateModal, setShowCreateModal] = useState(false)
-
-  async function createRoom () {
-    const { data, error } = await client.from('games').insert({
-      code: 'asdlol123',
-      private: false
-    })
-
-    if (error) {
-      console.log(error)
-      return
-    }
-
-    const [game] = data
-    navigate(`/rooms/${game.id}/${game.code}`)
-  }
 
   async function fetchPublicGames () {
     const { data, error } = await client.from('games').select(`
@@ -46,8 +30,6 @@ export default function Home() {
       console.log(error)
       return
     }
-
-    console.log(data)
 
     setPublicGames(data)
   }
@@ -77,7 +59,7 @@ export default function Home() {
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-4" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
         </svg>
-        Create game
+        Create a game
         </CreateGameButton>}
       {!session && <LoginModal />}
 
@@ -97,8 +79,7 @@ export default function Home() {
                     {game.status}
                   </span>
                   <span className={'flex items-center gap-2 font-semibold bg-rose-100 px-4 py-2 rounded-r-full shadow-xl'}>
-                    {game.players.length} / {game.max_player_count} players
-  | {game.viewer_count} viewers
+                    {game.players.length} / {game.max_player_count} players | {game.viewer_count} viewers
                   </span>
                 </div>
 
@@ -161,6 +142,7 @@ const GameList = tw.ul`
   gap-12
   w-full
   mt-12
+  pb-12
 `
 const GameListItem = tw.li`
   grid
@@ -227,4 +209,6 @@ const CreateGameButton = tw.button`
   hocus:text-white
   hocus:shadow-lg
   active:bg-violet-700
+  sticky
+  top-4
 `
