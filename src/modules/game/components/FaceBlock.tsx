@@ -3,14 +3,18 @@ import tw from 'twin.macro'
 import HotDog from './HotDog'
 
 interface FaceBlockProps {
-  emoji: string
-  currentHotDogBites: number
+  emoji?: string
+  currentHotDogBites?: number
+  hotDogsEaten: number
 }
 
-export default function FaceBlock ({ emoji, currentHotDogBites }: FaceBlockProps) {
+export default function FaceBlock ({ emoji, currentHotDogBites, hotDogsEaten }: FaceBlockProps) {
   return (
     <Card>
-      <h2 className="text-7xl">{emoji}</h2>
+      <h2 className="flex items-center text-7xl">
+        {emoji}
+        <span className="font-black text-5xl ml-4">{hotDogsEaten - 1}</span>
+      </h2>
       <HotDog bites={currentHotDogBites} />
     </Card>
   )
