@@ -8,32 +8,27 @@ import { useTimer } from 'react-timer-hook'
 import addSeconds from 'date-fns/addSeconds'
 import { useSupabase } from '../../../contexts/SupabaseContext';
 import { useParams } from 'react-router-dom';
+import FaceBlock from './FaceBlock';
 
 const MODEL_URL = '/models'
 
-export default function VideoCard() {
+interface VideoCardProps {
+  setEmoji: (emoji: string) => void
+  emoji: string
+  gameStatus: string
+}
+
+export default function VideoCard({ setEmoji, emoji, gameStatus }: VideoCardProps) {
   const videoElement = useRef<HTMLVideoElement>(null)
   const mouthState = useRef('closed')
   const hotDogBase = { bites: 0, finished: false }
   const [hotDogs, setHotDogs] = useState([hotDogBase])
   const currentDogIndex = useRef(0)
   const time = useRef(addSeconds(new Date(), 30))
-  const [participants, setParticipants] = useState([])
-  const [startingGame, setStartingGame] = useState(false)
-  const [gameStatus, setGameStatus] = useState('OPEN')
+
   const { client, rpcQuery } = useSupabase()
   const session = client.auth.session()
   const params = useParams()
-
-  const gameSubscription = useRef(client.from(`games:id=eq.${params?.id}`)
-    .on('UPDATE', handleGameState)
-    .subscribe()
-  )
-  const participantsSubscription = useRef(client.from(`games_players:game=eq.${params?.id}`)
-    .on('INSERT', handlePlayerJoin)
-    .on('UPDATE', handlePlayerUpdate)
-    .subscribe()
-  )
 
   async function onPlay () {
       const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 })
@@ -49,11 +44,12 @@ export default function VideoCard() {
 
         const distanceBetweenLips = getDifference(upperLipPositionAverage, bottomLipPositionAverage)
         
-        if (distanceBetweenLips <= 55 && distanceBetweenLips >= 12) {
+        if (distanceBetweenLips <= 200 && distanceBetweenLips >= 12) {
           mouthState.current = 'open'
+          setEmoji('😄')
         } else {
           if (mouthState.current === 'open') {
-            const bites = hotDogs[currentDogIndex.current].bites + 1
+            const bites = hotDogs[currentDogIndex.current]?.bites + 1 || 0
             const finished = bites === 3
             let updatedDogs = update(currentDogIndex.current, { bites, finished }, hotDogs)
 
@@ -63,7 +59,7 @@ export default function VideoCard() {
             }
 
             setHotDogs(updatedDogs)
-            
+            setEmoji('😊')
             mouthState.current = 'closed'
             
             await client.from('games_players').update({
@@ -74,28 +70,6 @@ export default function VideoCard() {
         }
       }
   }
-
-  function handlePlayerJoin (payload: Record<string, unknown>) {
-    setParticipants(participants.concat([payload.new]))
-  }
-
-  function handlePlayerUpdate (payload: Record<string, unknown>) {
-    const participantIndex = participants.findIndex((participant) => participant.id === payload.new.id)
-    const updatedParticipants = update(participantIndex, payload.new, participants)
-
-    setParticipants(updatedParticipants)
-  }
-
-  function handleGameState (payload: Record<string, unknown>) {
-    setGameStatus(payload.new.status)
-  }
-
-  useEffect(function removeSubscriptions () {
-    return () => {
-      gameSubscription.current && client.removeSubscription(gameSubscription.current)
-      participantsSubscription.current && client.removeSubscription(participantsSubscription.current)
-    }
-  }, [])
 
   useAnimationFrame(() => onPlay(), hotDogs)
 
@@ -142,9 +116,9 @@ export default function VideoCard() {
   return (
     <Card>
       <button onClick={startGame}>Start game</button>
-      <video ref={videoElement} autoPlay muted playsInline />
+      <video ref={videoElement} autoPlay muted playsInline className="w-0 h-0" />
       {seconds} second(s) left
-      {hotDogs.map((hotDog: Record<string, unknown>, index: number) => <p key={index}>bites: {hotDog.bites} - finished: {hotDog.finished ? 'true' : 'false'}</p>)}
+      <FaceBlock emoji={emoji} currentHotDogBites={hotDogs[currentDogIndex.current].bites} />
     </Card>
   )
 }
@@ -183,4 +157,5 @@ const Card = tw.div`
   border
   p-4
   bg-white
+  overflow-hidden
 `
