@@ -2,7 +2,7 @@ import React from 'react'
 import tw, { styled } from 'twin.macro'
 
 interface HotDogProps {
-  bites: number
+  bites?: number
 }
 
 export default function HotDog ({ bites }: HotDogProps) {
