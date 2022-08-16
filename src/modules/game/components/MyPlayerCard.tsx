@@ -1,32 +1,28 @@
 import React, { useRef, useEffect, useState } from 'react'
-import tw from 'twin.macro'
+import tw, { styled } from 'twin.macro'
 import * as faceapi from '@vladmandic/face-api';
 import takeLast from 'ramda/src/takeLast'
 import update from 'ramda/src/update'
 import append from 'ramda/src/append'
-import { useTimer } from 'react-timer-hook'
-import addSeconds from 'date-fns/addSeconds'
 import { useSupabase } from '../../../contexts/SupabaseContext';
 import { useParams } from 'react-router-dom';
 import FaceBlock from './FaceBlock';
 
 const MODEL_URL = '/models'
 
-interface VideoCardProps {
+interface MyPlayerCardProps {
   setEmoji: (emoji: string) => void
   emoji: string
-  gameStatus: string
 }
 
-export default function VideoCard({ setEmoji, emoji, gameStatus }: VideoCardProps) {
+export default function MyPlayerCard({ setEmoji, emoji }: MyPlayerCardProps) {
   const videoElement = useRef<HTMLVideoElement>(null)
   const mouthState = useRef('closed')
   const hotDogBase = { bites: 0, finished: false }
   const [hotDogs, setHotDogs] = useState([hotDogBase])
   const currentDogIndex = useRef(0)
-  const time = useRef(addSeconds(new Date(), 30))
 
-  const { client, rpcQuery } = useSupabase()
+  const { client } = useSupabase()
   const session = client.auth.session()
   const params = useParams()
 
@@ -73,8 +69,6 @@ export default function VideoCard({ setEmoji, emoji, gameStatus }: VideoCardProp
 
   useAnimationFrame(() => onPlay(), hotDogs)
 
-  const { seconds } = useTimer({ expiryTimestamp: time.current, autoStart: false })
-
   async function loadModels () {
     await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
     await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
@@ -95,30 +89,10 @@ export default function VideoCard({ setEmoji, emoji, gameStatus }: VideoCardProp
     load()
   }, [])
 
-  async function endGame() {
-    await rpcQuery('end_game', { id: params?.id })
-  }
-
-  useEffect(function handleEndGame() {
-    if (seconds === 0 && gameStatus === 'IN_PROGRESS') {
-      endGame()
-    }
-  }, [seconds, gameStatus])
-
-  async function startGame () {
-    await rpcQuery('start_game', { id: params?.id })
-  }
-  
-  if (seconds === 0) {
-    return <p>Time is up!</p>
-  }
-
   return (
     <Card>
-      <button onClick={startGame}>Start game</button>
       <video ref={videoElement} autoPlay muted playsInline className="w-0 h-0" />
-      {seconds} second(s) left
-      <FaceBlock emoji={emoji} currentHotDogBites={hotDogs[currentDogIndex.current].bites} />
+      <FaceBlock hotDogsEaten={hotDogs.length} emoji={emoji} currentHotDogBites={hotDogs[currentDogIndex.current]?.bites} />
     </Card>
   )
 }
@@ -126,20 +100,22 @@ export default function VideoCard({ setEmoji, emoji, gameStatus }: VideoCardProp
 const useAnimationFrame = (callback: () => void, deps: unknown) => {
   // Use useRef for mutable variables that we want to persist
   // without triggering a re-render on their change
-  const requestRef = React.useRef()
+  const requestRef = useRef()
   /**
    * The callback function is automatically passed a timestamp indicating
    * the precise time requestAnimationFrame() was called.
    */
 
-  React.useEffect(() => {
+  useEffect(() => {
     const animate = () => {
       callback()
       requestRef.current = requestAnimationFrame(animate)
     }
   
     requestRef.current = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(requestRef.current)
+    return () => {
+      cancelAnimationFrame(requestRef.current)
+    }
   }, [deps]) // Make sure the effect runs only once
 }
 
@@ -152,10 +128,12 @@ function getDifference(a: number, b: number) {
 }
 
 const Card = tw.div`
-  rounded-md
-  border-neutral-200
-  border
-  p-4
   bg-white
+  border-neutral-200
+  rounded-md
+  border-b-2
+  border-r-2
+  p-4
   overflow-hidden
+  shadow-2xl
 `
