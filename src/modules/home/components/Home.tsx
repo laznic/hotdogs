@@ -16,13 +16,12 @@ export default function Home() {
       id,
       status,
       created_at,
-      viewer_count,
       max_player_count,
       players:games_players (
         ready
       )
     `)
-    .neq('status', 'FINISHED')
+    .eq('status', 'OPEN')
     .eq('private', false)
     .order('status', { ascending: true })
     
@@ -79,7 +78,7 @@ export default function Home() {
                     {game.status}
                   </span>
                   <span className={'flex items-center gap-2 font-semibold bg-rose-100 px-4 py-2 rounded-r-full shadow-xl'}>
-                    {game.players.length} / {game.max_player_count} players | {game.viewer_count} viewers
+                    {game.players.length} / {game.max_player_count} players
                   </span>
                 </div>
 
@@ -92,14 +91,6 @@ export default function Home() {
                       Join
                     </JoinButton>
                   )}
-
-                  <WatchButton to={`/rooms/${game.id}/view`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    Watch
-                  </WatchButton>
                 </div>
 
               </GameListItem>
@@ -168,25 +159,6 @@ const JoinButton = tw(Link)`
   transition-all
   hocus:text-emerald-600
   hocus:shadow-lg
-`
-const WatchButton = tw(Link)`
-  flex
-  items-center
-  rounded
-  hocus:bg-rose-50
-  border
-  border-dashed
-  border-rose-300
-  hocus:border-white
-  hocus:border-solid
-  px-3
-  py-2
-  font-bold
-  text-stone-700
-  hocus:shadow-lg
-  hocus:-translate-y-1
-  transition-all
-  hocus:text-slate-500
 `
 
 const CreateGameButton = tw.button`
