@@ -1,7 +1,6 @@
-import React, { useState, useEffect, RefObject, useRef, ChangeEvent, } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import tw, { styled } from 'twin.macro'
-import { useSupabase } from '../../../contexts/SupabaseContext'
+import React, { useState, useEffect, RefObject, useRef } from 'react'
+import { useParams } from 'react-router-dom'
+import tw from 'twin.macro'
 
 interface JoinLinkModalProps {
   toggleModal: () => void
@@ -9,7 +8,6 @@ interface JoinLinkModalProps {
 }
 
 export default function JoinLinkModal ({ toggleModal, isOpen }: JoinLinkModalProps) {
-  const [maxPlayers, setMaxPlayers] = useState<string | number>(2)
   const modalRef = useRef(null)
   const [linkCopied, setLinkCopied] = useState(false)
   const params = useParams()
@@ -18,24 +16,6 @@ export default function JoinLinkModal ({ toggleModal, isOpen }: JoinLinkModalPro
     toggleModal()
     setLinkCopied(false)
   })
-
-  function handleMaxPlayerCount (event: ChangeEvent) {
-    const { value } = event.target
-
-    const valueAsNumber = parseInt(value)
-
-    if (Object.is(NaN, valueAsNumber)) {
-      setMaxPlayers('')
-      return
-    }
-
-    if (valueAsNumber >= 5) {
-      setMaxPlayers(5)
-      return
-    }
-
-    setMaxPlayers(valueAsNumber)
-  }
 
   async function copyToClipboard () {
     try {
@@ -51,7 +31,7 @@ export default function JoinLinkModal ({ toggleModal, isOpen }: JoinLinkModalPro
         <h2 className="font-bold text-xl mb-4 border-b pb-4">Join code</h2>
 
         <section className="grid gap-4 mb-4">
-          <JoinLinkInput type="text" disabled placeholder="2" min={1} max={5} onChange={handleMaxPlayerCount} value={maxPlayers}/>
+          <JoinLinkInput type="text" disabled value={params.code} />
           {linkCopied && (
             <span className="text-emerald-400 inline-flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
