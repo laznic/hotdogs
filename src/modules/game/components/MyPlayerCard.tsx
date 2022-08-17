@@ -13,9 +13,10 @@ const MODEL_URL = '/models'
 interface MyPlayerCardProps {
   setEmoji: (emoji: string) => void
   emoji: string
+  gameStarted: boolean
 }
 
-export default function MyPlayerCard({ setEmoji, emoji }: MyPlayerCardProps) {
+export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerCardProps) {
   const videoElement = useRef<HTMLVideoElement>(null)
   const mouthState = useRef('closed')
   const hotDogBase = { bites: 0, finished: false }
@@ -45,23 +46,28 @@ export default function MyPlayerCard({ setEmoji, emoji }: MyPlayerCardProps) {
           setEmoji('😄')
         } else {
           if (mouthState.current === 'open') {
-            const bites = hotDogs[currentDogIndex.current]?.bites + 1 || 0
-            const finished = bites === 3
-            let updatedDogs = update(currentDogIndex.current, { bites, finished }, hotDogs)
-
-            if (finished) {
-              updatedDogs = append(hotDogBase, updatedDogs)
-              currentDogIndex.current = currentDogIndex.current + 1
+            if (gameStarted) {
+              const bites = hotDogs[currentDogIndex.current]?.bites + 1 || 0
+              const finished = bites === 3
+              let updatedDogs = update(currentDogIndex.current, { bites, finished }, hotDogs)
+  
+              if (finished) {
+                updatedDogs = append(hotDogBase, updatedDogs)
+                currentDogIndex.current = currentDogIndex.current + 1
+              }
+  
+              setHotDogs(updatedDogs)
             }
 
-            setHotDogs(updatedDogs)
             setEmoji('😊')
             mouthState.current = 'closed'
             
-            await client.from('games_players').update({
-              hotdogs: updatedDogs 
-            })
-            .match({ user_id: session?.user?.id, game: params?.id })
+            if (gameStarted) {
+              await client.from('games_players').update({
+                hotdogs: updatedDogs 
+              })
+              .match({ user_id: session?.user?.id, game: params?.id })
+            }
           }
         }
       }
@@ -88,6 +94,12 @@ export default function MyPlayerCard({ setEmoji, emoji }: MyPlayerCardProps) {
 
     load()
   }, [])
+
+  useEffect(() => {
+    if (gameStarted) {
+      setHotDogs([hotDogBase])
+    }
+  }, [gameStarted])
 
   return (
     <Card>
