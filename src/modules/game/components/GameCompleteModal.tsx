@@ -20,7 +20,7 @@ export default function CreateGameModal ({ isOpen }: CreateGameModalProps) {
   }
 
   function leaveGame () {
-    navigate('/', { replace: true })
+    navigate('/')
   }
 
   useEffect(() => {

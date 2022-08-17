@@ -24,6 +24,7 @@ export default function Room() {
   const { seconds: countdown, restart: restartCountdown } = useTimer({ expiryTimestamp: now.current, autoStart: false })
   const navigate = useNavigate()
   const [disableLeaving, setDisableLeaving] = useState(true)
+  const createdByMe = game?.created_by === session?.user.id
   
   function isMe (userId: string, playerId: string) {
     return userId === session?.user.id || playerId === myPlayerId
@@ -85,6 +86,7 @@ export default function Room() {
 
     if (!error) {
       setMyPlayerId(data)
+      fetchPlayers()
     }
   }
 
@@ -92,9 +94,15 @@ export default function Room() {
     await rpcQuery('leave_game', { id: myPlayerId })
   }
 
+  const startingInProgressOrDone = ['STARTING', 'IN_PROGRESS', 'FINISHED'].some(status => status === gameStatus)
+
   useEffect(function handleGameJoining () {
     if (game && !myPlayerId) {
-      if ((!game.private || (game.private && params?.code))) {
+      if (game.private && !params?.code) {
+        navigate('/', { replace: true })
+      }
+
+      if ((!game.private || (game.private && params?.code)) && !startingInProgressOrDone) {
         joinGame()
       } else {
         navigate('/', { replace: true })
@@ -106,13 +114,7 @@ export default function Room() {
         leaveGame()
       }
     }
-  }, [game, params?.code, myPlayerId, gameStatus])
-
-  useEffect(function redirectUserIfStarted() {
-    if (['STARTING', 'IN_PROGRESS', 'FINISHED'].some(status => status === gameStatus) && !myPlayerId) {
-      navigate('/', { replace: true })
-    }
-  }, [gameStatus])
+  }, [game, params?.code, myPlayerId, gameStatus, startingInProgressOrDone])
 
   useEffect(function startGameCountdown() {
     if (countdown === 0 && gameStatus === 'STARTING') {
@@ -137,7 +139,7 @@ export default function Room() {
 
     if (!error) {
       setGame(data)
-      fetchPlayers()
+      setGameStatus(data.status)
     }
   }
 
@@ -149,6 +151,10 @@ export default function Room() {
     }
   }
 
+  if (gameStatus === 'FINISHED') {
+    return <GameCompleteModal isOpen />
+  }
+
   if (!myPlayerId) {
     return (
       <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-red-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -157,12 +163,6 @@ export default function Room() {
       </svg>
     )
   }
-    
-  if (gameStatus === 'FINISHED') {
-    return <GameCompleteModal isOpen />
-  }
-
-  const createdByMe = game?.created_by === session?.user.id
 
   return (
     <>
