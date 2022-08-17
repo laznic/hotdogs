@@ -46,6 +46,9 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerC
           setEmoji('😄')
         } else {
           if (mouthState.current === 'open') {
+            setEmoji('😊')
+            mouthState.current = 'closed'
+
             if (gameStarted) {
               const bites = hotDogs[currentDogIndex.current]?.bites + 1 || 0
               const finished = bites === 3
@@ -57,17 +60,11 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerC
               }
   
               setHotDogs(updatedDogs)
-            }
-
-            setEmoji('😊')
-            mouthState.current = 'closed'
-            
-            if (gameStarted) {
               await client.from('games_players').update({
-                hotdogs: updatedDogs 
-              })
-              .match({ user_id: session?.user?.id, game: params?.id })
-            }
+                  hotdogs: updatedDogs 
+                })
+                .match({ user_id: session?.user?.id, game: params?.id })
+              }
           }
         }
       }
