@@ -200,6 +200,12 @@ export default function Room() {
               {countdown}
             </span>
           )}
+
+          {gameStatus === 'IN_PROGRESS' && (
+            <span className="text-center text-9xl font-black text-white drop-shadow-xl">
+              {seconds}
+            </span>
+          )}
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap justify-evenly sm:w-1/2 xl:w-3/4 mx-auto">
