@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
-import update from 'ramda/src/update'
 import addSeconds from 'date-fns/addSeconds'
 import { useTimer } from 'react-timer-hook'
 import tw from 'twin.macro'
