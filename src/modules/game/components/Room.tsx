@@ -18,7 +18,7 @@ export default function Room() {
   const [game, setGame] = useState()
   const [myPlayerId, setMyPlayerId] = useState()
   const now = useRef(new Date)
-  const [showJoinLinkModal, setShowJoinLinkModal] = useState()
+  const [showJoinLinkModal, setShowJoinLinkModal] = useState(false)
   const gameStarted = gameStatus === 'IN_PROGRESS'
   const { seconds, restart: restartTimer } = useTimer({ expiryTimestamp: now.current, autoStart: false })
   const { seconds: countdown, restart: restartCountdown } = useTimer({ expiryTimestamp: now.current, autoStart: false })
@@ -26,17 +26,6 @@ export default function Room() {
   
   function isMe (userId: string, playerId: string) {
     return userId === session?.user.id || playerId === myPlayerId
-  }
-
-  function handlePlayerJoin (payload: Record<string, unknown>) {
-    setParticipants(participants.concat([payload.new]))
-  }
-
-  function handlePlayerUpdate (payload: Record<string, unknown>) {
-    const participantIndex = participants.findIndex((participant) => participant.id === payload.new.id)
-    const updatedParticipants = update(participantIndex, payload.new, participants)
-
-    setParticipants(updatedParticipants)
   }
 
   function handleGameState (payload: Record<string, unknown>) {
@@ -75,8 +64,9 @@ export default function Room() {
     fetchGame()
 
     client.from(`games_players:game=eq.${params?.id}`)
-      .on('INSERT', handlePlayerJoin)
-      .on('UPDATE', handlePlayerUpdate)
+      .on('INSERT', fetchPlayers)
+      .on('UPDATE', fetchPlayers)
+      .on('DELETE', fetchPlayers)
       .subscribe()
 
     client.from(`games:id=eq.${params?.id}`)
@@ -84,7 +74,6 @@ export default function Room() {
       .subscribe()
 
     return () => {
-      console.log('unmount?')
       client.removeAllSubscriptions()
     }
   }, [])
@@ -98,18 +87,30 @@ export default function Room() {
     }
 
     setMyPlayerId(data)
-  } 
+  }
+
+  async function leaveGame () {
+    await rpcQuery('leave_game', { id: myPlayerId })
+  }
 
   useEffect(function handleGameJoining () {
-    if (game && (!game.private || params?.code) && !myPlayerId) {
-      joinGame()
-    } else {
-      navigate('/', { replace: true })
+    if (game && !myPlayerId) {
+      if ((!game.private || (game.private && params?.code))) {
+        joinGame()
+      } else {
+        navigate('/', { replace: true })
+      }
+    }
+
+    return () => {
+      if (myPlayerId) {
+        leaveGame()
+      }
     }
   }, [game, params?.code, myPlayerId])
 
   useEffect(function redirectUserIfStarted() {
-    if (['STARTING', 'IN_PROGRESS', 'FINISHED'].some(status => status === gameStatus)) {
+    if (['STARTING', 'IN_PROGRESS', 'FINISHED'].some(status => status === gameStatus) && !myPlayerId) {
       navigate('/', { replace: true })
     }
   }, [gameStatus])
@@ -124,14 +125,39 @@ export default function Room() {
     setShowJoinLinkModal(!showJoinLinkModal)
   }
 
-  async function  fetchGame () {
-    const { data, error } = await rpcQuery('fetch_game', { id: params?.id })
+  async function fetchGame () {
+    const { data, error } = await client.from('games')
+      .select(`
+        id,
+        private,
+        status
+      `)
+      .eq('id', params?.id)
+      .single()
 
     if (!error) {
-      const { participants } = data
       setGame(data)
-      setParticipants(participants)
+      fetchPlayers()
     }
+  }
+
+  async function fetchPlayers () {
+    const { data, error } = await client.from('games_players')
+      .select()
+      .eq('game', params?.id)
+
+    if (!error) {
+      setParticipants(data)
+    }
+  }
+
+  if (!myPlayerId) {
+    return (
+      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-red-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    )
   }
     
   if (seconds === 0 && gameStarted) {
