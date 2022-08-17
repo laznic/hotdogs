@@ -102,6 +102,9 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerC
     <Card>
       <video ref={videoElement} autoPlay muted playsInline className="w-0 h-0" />
       <FaceBlock hotDogsEaten={hotDogs.length} emoji={emoji} currentHotDogBites={hotDogs[currentDogIndex.current]?.bites} />
+      <span className="bg-sky-500 text-sky-50 font-extrabold w-full flex justify-center py-2 mt-4 rounded">
+        You {session && `(@${session?.user?.user_metadata.preferred_username})`}
+      </span>
     </Card>
   )
 }

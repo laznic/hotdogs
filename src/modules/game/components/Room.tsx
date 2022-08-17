@@ -81,12 +81,9 @@ export default function Room() {
   async function joinGame () {
     const { data, error } = await rpcQuery('join_game', { id: params?.id })
 
-    if (error) {
-      console.log(error)
-      return
+    if (!error) {
+      setMyPlayerId(data)
     }
-
-    setMyPlayerId(data)
   }
 
   async function leaveGame () {
@@ -130,7 +127,8 @@ export default function Room() {
       .select(`
         id,
         private,
-        status
+        status,
+        created_by
       `)
       .eq('id', params?.id)
       .single()
@@ -142,9 +140,7 @@ export default function Room() {
   }
 
   async function fetchPlayers () {
-    const { data, error } = await client.from('games_players')
-      .select()
-      .eq('game', params?.id)
+    const { data, error } = await rpcQuery('fetch_participants', { game_id: params?.id })
 
     if (!error) {
       setParticipants(data)
@@ -172,8 +168,7 @@ export default function Room() {
       <section className="grid gap-12 items-center mx-auto justify-center">
 
         <div className="max-w-sm mx-auto text-center">
-        <MyPlayerCard emoji={emoji} setEmoji={setEmoji} gameStarted={gameStarted} />
-          <span className="bg-sky-500 text-sky-50 font-extrabold w-full flex justify-center py-2 mt-4 rounded">You (@{session?.user?.user_metadata.preferred_username})</span>
+          <MyPlayerCard emoji={emoji} setEmoji={setEmoji} gameStarted={gameStarted} />
           {!gameStarted && (
             <>
               {createdByMe && (
@@ -202,7 +197,7 @@ export default function Room() {
         <div className="flex flex-wrap sm:flex-nowrap justify-evenly sm:w-1/2 xl:w-3/4 mx-auto">
           {!participants.filter((participant) => !isMe(participant.user_id, participant.id)).length && <span className="text-rose-700">Waiting for other players</span> }
           {participants.filter((participant) => !isMe(participant.user_id, participant.id)).map((participant) => (
-            <OtherPlayerCard key={participant.id} hotDogs={participant.hotdogs} ready={participant.ready} gameStarted={gameStarted} />
+            <OtherPlayerCard key={participant.id} username={participant.username} hotDogs={participant.hotdogs} ready={participant.ready} gameStarted={gameStarted} />
           ))}
         </div>
       </section>
@@ -233,7 +228,7 @@ const StartGameButton = tw.button`
   mb-6
   font-bold
   shadow-lg
-  hover:-translate-y-2
+  hover:-translate-y-1
   hover:shadow-xl
   transition-all
 `

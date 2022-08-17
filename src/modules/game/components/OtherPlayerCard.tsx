@@ -4,13 +4,17 @@ import FaceBlock from './FaceBlock';
 
 interface OtherPlayerCardProps {
   hotDogs: { bites: number, finished: boolean }[],
-  ready: boolean
+  ready: boolean,
+  username: string | null
 }
 
-export default function OtherPlayerCard({ hotDogs, ready }: OtherPlayerCardProps) {
+export default function OtherPlayerCard({ hotDogs, ready, username }: OtherPlayerCardProps) {
   return (
     <Card ready={ready}>
       <FaceBlock hotDogsEaten={hotDogs?.length || 1} emoji={''} />
+      <span className="bg-sky-500 text-sky-50 font-extrabold w-full flex justify-center py-2 mt-4 rounded">
+        {username ? `@${username}` : 'Anon'}
+      </span>
     </Card>
   )
 }
