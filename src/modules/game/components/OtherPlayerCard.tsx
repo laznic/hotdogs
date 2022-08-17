@@ -3,17 +3,18 @@ import tw, { styled } from 'twin.macro'
 import FaceBlock from './FaceBlock';
 
 interface OtherPlayerCardProps {
-  hotDogs: { bites: number, finished: boolean }[],
-  ready: boolean,
+  hotDogs: { bites: number, finished: boolean }[]
+  ready: boolean
   username: string | null
+  id: number | string
 }
 
-export default function OtherPlayerCard({ hotDogs, ready, username }: OtherPlayerCardProps) {
+export default function OtherPlayerCard({ hotDogs, ready, username, id }: OtherPlayerCardProps) {
   return (
     <Card ready={ready}>
       <FaceBlock hotDogsEaten={hotDogs?.length || 1} emoji={''} />
       <span className="bg-sky-500 text-sky-50 font-extrabold w-full flex justify-center py-2 mt-4 rounded">
-        {username ? `@${username}` : 'Anon'}
+        {username ? `@${username}` : `Anon ${id}`}
       </span>
     </Card>
   )
