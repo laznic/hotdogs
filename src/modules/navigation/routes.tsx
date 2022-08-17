@@ -11,7 +11,6 @@ export default [
       { index: true, element: <Home /> },
       { path: "/rooms/:id", element: <Room /> },
       { path: "/rooms/:id/:code", element: <Room /> },
-      { path: "/rooms/:id/view", element: <Room viewMode /> },
       { path: "*", element: <NoMatch /> },
     ],
   },
