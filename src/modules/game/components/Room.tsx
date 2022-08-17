@@ -100,13 +100,19 @@ export default function Room() {
     setMyPlayerId(data)
   } 
 
-  useEffect(() => {
+  useEffect(function handleGameJoining () {
     if (game && (!game.private || params?.code) && !myPlayerId) {
       joinGame()
     } else {
       navigate('/', { replace: true })
     }
   }, [game, params?.code, myPlayerId])
+
+  useEffect(function redirectUserIfStarted() {
+    if (['STARTING', 'IN_PROGRESS', 'FINISHED'].some(status => status === gameStatus)) {
+      navigate('/', { replace: true })
+    }
+  }, [gameStatus])
 
   useEffect(function startGameCountdown() {
     if (countdown === 0 && gameStatus === 'STARTING') {
