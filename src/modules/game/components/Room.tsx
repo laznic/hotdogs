@@ -8,6 +8,7 @@ import { useSupabase } from '../../../contexts/SupabaseContext';
 import MyPlayerCard from "./MyPlayerCard";
 import JoinLinkModal from './JoinLinkModal';
 import OtherPlayerCard from './OtherPlayerCard';
+import GameCompleteModal from './GameCompleteModal';
 
 export default function Room() {
   const params = useParams()
@@ -23,6 +24,7 @@ export default function Room() {
   const { seconds, restart: restartTimer } = useTimer({ expiryTimestamp: now.current, autoStart: false })
   const { seconds: countdown, restart: restartCountdown } = useTimer({ expiryTimestamp: now.current, autoStart: false })
   const navigate = useNavigate()
+  const [disableLeaving, setDisableLeaving] = useState(true)
   
   function isMe (userId: string, playerId: string) {
     return userId === session?.user.id || playerId === myPlayerId
@@ -38,7 +40,7 @@ export default function Room() {
       const gameSeconds = addSeconds(new Date(), 15)
       restartTimer(gameSeconds, true)
     }
- 
+
     setGameStatus(payload.new.status)
   }
 
@@ -57,6 +59,7 @@ export default function Room() {
   }
 
   async function startGameCountdown () {
+    setDisableLeaving(true)
     await rpcQuery('start_game_countdown', { id: params?.id })
   }
 
@@ -100,11 +103,11 @@ export default function Room() {
     }
 
     return () => {
-      if (myPlayerId) {
+      if (myPlayerId && !disableLeaving) {
         leaveGame()
       }
     }
-  }, [game, params?.code, myPlayerId])
+  }, [game, params?.code, myPlayerId, gameStatus])
 
   useEffect(function redirectUserIfStarted() {
     if (['STARTING', 'IN_PROGRESS', 'FINISHED'].some(status => status === gameStatus) && !myPlayerId) {
@@ -156,8 +159,8 @@ export default function Room() {
     )
   }
     
-  if (seconds === 0 && gameStarted) {
-    return <p>Time is up!</p>
+  if (gameStatus === 'FINISHED') {
+    return <GameCompleteModal isOpen />
   }
 
   const createdByMe = game?.created_by === session?.user.id
@@ -166,10 +169,9 @@ export default function Room() {
     <>
       {showJoinLinkModal && !gameStarted && <JoinLinkModal isOpen={showJoinLinkModal} toggleModal={toggleJoinLinkModal}  />}
       <section className="grid gap-12 items-center mx-auto justify-center">
-
         <div className="max-w-sm mx-auto text-center">
           <MyPlayerCard emoji={emoji} setEmoji={setEmoji} gameStarted={gameStarted} />
-          {!gameStarted && (
+          {!gameStarted && gameStatus !== 'STARTING' && (
             <>
               {createdByMe && (
                 <ShowJoinCodeButton onClick={toggleJoinLinkModal}>
@@ -192,12 +194,18 @@ export default function Room() {
               </p>
             </>
           )}
+
+          {gameStatus === 'STARTING' && (
+            <span className="text-center text-9xl font-black text-white drop-shadow-xl">
+              {countdown}
+            </span>
+          )}
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap justify-evenly sm:w-1/2 xl:w-3/4 mx-auto">
           {!participants.filter((participant) => !isMe(participant.user_id, participant.id)).length && <span className="text-rose-700">Waiting for other players</span> }
           {participants.filter((participant) => !isMe(participant.user_id, participant.id)).map((participant) => (
-            <OtherPlayerCard key={participant.id} username={participant.username} hotDogs={participant.hotdogs} ready={participant.ready} gameStarted={gameStarted} />
+            <OtherPlayerCard key={participant.id} id={participant.id} username={participant.username} hotDogs={participant.hotdogs} ready={participant.ready} gameStarted={gameStarted} />
           ))}
         </div>
       </section>
