@@ -5,12 +5,6 @@ import tw from 'twin.macro'
 export default function Layout() {
   return (
     <>
-      <Nav>
-        <Logo to="/">🌭</Logo>
-        <NavLinks>
-        </NavLinks>
-      </Nav>
-
       <Outlet />
     </>
   );

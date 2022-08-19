@@ -10,8 +10,10 @@ export default function Home() {
   const { client, session } = useSupabase()
   const [publicGames, setPublicGames] = useState([])
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   async function fetchPublicGames () {
+    setLoading(true)
     const { data, error } = await client.from('games').select(`
       id,
       status,
@@ -29,7 +31,8 @@ export default function Home() {
       console.log(error)
       return
     }
-
+    
+    setLoading(false)
     setPublicGames(data)
   }
 
@@ -43,7 +46,8 @@ export default function Home() {
 
   return (
     <div className="text-center">
-      <h1 className="text-6xl font-black text-white drop-shadow-lg mb-4">
+      <h1 className="text-6xl font-black text-rose-900 mb-4">
+        <span className="block text-center mb-4">😄🌭</span>
         The Hot Dog Game
       </h1>
 
@@ -69,7 +73,13 @@ export default function Home() {
       <section className="mt-16">
         <h3 className="text-3xl font-bold text-center text-rose-900">Or check out some of the public games 👇</h3>
         <GameList>
-          {publicGames.map((game) => {
+          {loading && <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-rose-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          }
+          {!loading && !publicGames.filter((game) => game.players.length < game.max_player_count).length && <p className="text-rose-800">No public games available.</p>}
+          {!loading && publicGames.filter((game) => game.players.length < game.max_player_count).map((game) => {
             return (
               <GameListItem key={game.id}>
                 <div className="flex items-center flex-wrap">
@@ -134,6 +144,7 @@ const GameList = tw.ul`
   w-full
   mt-12
   pb-12
+  justify-center
 `
 const GameListItem = tw.li`
   grid

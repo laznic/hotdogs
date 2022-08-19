@@ -16,6 +16,7 @@ const Main = tw.main`
   container
   mx-auto
   relative
+  py-8
 `
 
 export default App
