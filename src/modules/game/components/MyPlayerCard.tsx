@@ -75,8 +75,6 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerC
   async function loadModels () {
     await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
     await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
-    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-    await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
   }
 
   useEffect(function loadVideo () {
