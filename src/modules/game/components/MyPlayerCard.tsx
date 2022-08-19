@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useRef, useEffect, useState } from 'react'
 import tw, { styled } from 'twin.macro'
 import * as faceapi from '@vladmandic/face-api';
