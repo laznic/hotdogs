@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect, RefObject, useRef, ChangeEvent, } from 'react'
 import { useNavigate } from 'react-router-dom'
 import tw, { styled } from 'twin.macro'
