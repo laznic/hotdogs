@@ -12,8 +12,6 @@ Built with
 - [FaceAPI](https://github.com/vladmandic/face-api)
 - [twin.macro](https://github.com/ben-rogerson/twin.macro)
 
-**NOTE:** This does not currently work well with mobile devices! Use a desktop device with a webcam instead.
-
 ## How it works
 
 Uses webcam to detect users face, and to determine when their mouth is opened or closed.
