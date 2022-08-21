@@ -4,6 +4,8 @@
 
 Compete against friends (up to 5 people) in private matches, or join public games with anyone.
 
+**NOTE:** This does not work as nicely with mobile devices as it does with desktops and laptops.
+
 <sup>Made for Supabase Launch Week 5 Hackathon.</sup> 
 
 Built with
