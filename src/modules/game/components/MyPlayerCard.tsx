@@ -1,6 +1,5 @@
-// @ts-nocheck
 import React, { useRef, useEffect, useState } from 'react'
-import tw, { styled } from 'twin.macro'
+import tw from 'twin.macro'
 import * as faceapi from '@vladmandic/face-api';
 import takeLast from 'ramda/src/takeLast'
 import update from 'ramda/src/update'
@@ -8,6 +7,7 @@ import append from 'ramda/src/append'
 import { useSupabase } from '../../../contexts/SupabaseContext';
 import { useParams } from 'react-router-dom';
 import FaceBlock from './FaceBlock';
+import useAnimationFrame from '../../../shared/hooks/useAnimationFrame';
 
 const MODEL_URL = '/models'
 
@@ -36,12 +36,12 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerC
         const mouth = result.landmarks.getMouth()
         const bottomLip = takeLast(3, mouth)
         const upperLip = takeLast(3, mouth.slice(0, mouth.length - 4))
-  
+
         const bottomLipPositionAverage = bottomLip.reduce(sumYPositions, 0) / bottomLip.length
         const upperLipPositionAverage = upperLip.reduce(sumYPositions, 0) / upperLip.length
 
         const distanceBetweenLips = getDifference(upperLipPositionAverage, bottomLipPositionAverage)
-        
+
         if (distanceBetweenLips <= 200 && distanceBetweenLips >= 12) {
           mouthState.current = 'open'
           setEmoji('😄')
@@ -101,36 +101,16 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerC
     <Card>
       <video ref={videoElement} autoPlay muted playsInline className="w-0 h-0" />
       <FaceBlock hotDogsEaten={hotDogs.length} emoji={emoji} currentHotDogBites={hotDogs[currentDogIndex.current]?.bites} />
-      <span className="bg-sky-500 text-sky-50 font-extrabold w-full flex justify-center py-2 mt-4 rounded">
+      <NameBlock>
         You {session && `(@${session?.user?.user_metadata.preferred_username})`}
-      </span>
+      </NameBlock>
     </Card>
   )
 }
 
-const useAnimationFrame = (callback: () => void, deps: unknown) => {
-  // Use useRef for mutable variables that we want to persist
-  // without triggering a re-render on their change
-  const requestRef = useRef()
-  /**
-   * The callback function is automatically passed a timestamp indicating
-   * the precise time requestAnimationFrame() was called.
-   */
-
-  useEffect(() => {
-    const animate = () => {
-      callback()
-      requestRef.current = requestAnimationFrame(animate)
-    }
-  
-    requestRef.current = requestAnimationFrame(animate)
-    return () => {
-      cancelAnimationFrame(requestRef.current)
-    }
-  }, [deps]) // Make sure the effect runs only once
-}
-
-function sumYPositions(acc: number, curr: Record<string, number>) {
+function sumYPositions(acc: faceapi.Point | number, curr: faceapi.Point): number {
+  // Just ignore this for now, gives a "private property" TS error
+  // @ts-ignore
   return curr._y + acc
 }
 
@@ -147,4 +127,16 @@ const Card = tw.div`
   p-4
   overflow-hidden
   shadow-2xl
+`
+
+const NameBlock = tw.span`
+  bg-sky-500
+  text-sky-50
+  font-extrabold
+  w-full
+  flex
+  justify-center
+  py-2
+  mt-4
+  rounded
 `

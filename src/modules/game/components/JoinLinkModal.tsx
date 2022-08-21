@@ -1,6 +1,7 @@
-import React, { useState, useEffect, RefObject, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import tw from 'twin.macro'
+import useOnClickOutside from '../../../shared/hooks/useOnClickOutside'
 
 interface JoinLinkModalProps {
   toggleModal: () => void
@@ -28,17 +29,17 @@ export default function JoinLinkModal ({ toggleModal, isOpen }: JoinLinkModalPro
     <>
       <Backdrop />
       <Modal ref={modalRef} open={isOpen}>
-        <h2 className="font-bold text-xl mb-4 border-b pb-4">Join code</h2>
+        <Title>Join code</Title>
 
-        <section className="grid gap-4 mb-4">
+        <ModalBody>
           <JoinLinkInput type="text" disabled value={params.code} />
           {linkCopied && (
-            <span className="text-emerald-400 inline-flex items-center">
+            <SuccessMessage>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Link copied
-            </span>
+            </SuccessMessage>
           )}
           <CopyButton onClick={copyToClipboard}>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -47,7 +48,7 @@ export default function JoinLinkModal ({ toggleModal, isOpen }: JoinLinkModalPro
 
             Copy join link
           </CopyButton>
-        </section>
+        </ModalBody>
       </Modal>
     </>
   )
@@ -81,6 +82,20 @@ const Modal = tw.dialog`
   z-10
 `
 
+const Title = tw.h2`
+  font-bold
+  text-xl
+  mb-4
+  border-b
+  pb-4
+`
+
+const ModalBody = tw.section`
+  grid
+  gap-4
+  mb-4
+`
+
 const JoinLinkInput = tw.input`
   rounded-xl
   w-full
@@ -110,29 +125,8 @@ const CopyButton = tw.button`
   active:bg-violet-700
 `
 
-function useOnClickOutside(ref: RefObject<HTMLElement>, handler: (event: MouseEvent | TouchEvent) => void) {
-  useEffect(
-    () => {
-      const listener = (event: MouseEvent | TouchEvent) => {
-        // Do nothing if clicking ref's element or descendent elements
-        if (!ref.current || ref.current.contains(event.target as HTMLElement)) {
-          return;
-        }
-        handler(event);
-      };
-      document.addEventListener("mousedown", listener);
-      document.addEventListener("touchstart", listener);
-      return () => {
-        document.removeEventListener("mousedown", listener);
-        document.removeEventListener("touchstart", listener);
-      };
-    },
-    // Add ref and handler to effect dependencies
-    // It's worth noting that because passed in handler is a new ...
-    // ... function on every render that will cause this effect ...
-    // ... callback/cleanup to run every render. It's not a big deal ...
-    // ... but to optimize you can wrap handler in useCallback before ...
-    // ... passing it into this hook.
-    [ref, handler]
-  );
-}
+const SuccessMessage = tw.span`
+  text-emerald-400
+  inline-flex
+  items-center
+`
