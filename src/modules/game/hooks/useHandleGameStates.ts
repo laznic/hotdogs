@@ -46,6 +46,7 @@ export default function useHandleGameStates(gameStatus: string, setGameStatus: (
     .subscribe()
 
     return () => {
+      console.log('test')
       client.removeSubscription(subscription)
     }
   }, [])

@@ -38,10 +38,10 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerC
         const upperLip = takeLast(3, mouth.slice(0, mouth.length - 4))
 
         const bottomLipPositionAverage = bottomLip.reduce(sumYPositions, 0) / bottomLip.length
-        const upperLipPositionAverage = bottomLip.reduce(sumYPositions, 0) / upperLip.length
+        const upperLipPositionAverage = upperLip.reduce(sumYPositions, 0) / upperLip.length
 
         const distanceBetweenLips = getDifference(upperLipPositionAverage, bottomLipPositionAverage)
-        
+
         if (distanceBetweenLips <= 200 && distanceBetweenLips >= 12) {
           mouthState.current = 'open'
           setEmoji('😄')
@@ -101,9 +101,9 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerC
     <Card>
       <video ref={videoElement} autoPlay muted playsInline className="w-0 h-0" />
       <FaceBlock hotDogsEaten={hotDogs.length} emoji={emoji} currentHotDogBites={hotDogs[currentDogIndex.current]?.bites} />
-      <span className="bg-sky-500 text-sky-50 font-extrabold w-full flex justify-center py-2 mt-4 rounded">
+      <NameBlock>
         You {session && `(@${session?.user?.user_metadata.preferred_username})`}
-      </span>
+      </NameBlock>
     </Card>
   )
 }
@@ -127,4 +127,16 @@ const Card = tw.div`
   p-4
   overflow-hidden
   shadow-2xl
+`
+
+const NameBlock = tw.span`
+  bg-sky-500
+  text-sky-50
+  font-extrabold
+  w-full
+  flex
+  justify-center
+  py-2
+  mt-4
+  rounded
 `

@@ -11,10 +11,10 @@ interface FaceBlockProps {
 export default function FaceBlock ({ emoji, currentHotDogBites, hotDogsEaten }: FaceBlockProps) {
   return (
     <Card>
-      <h2 className="flex items-center text-7xl">
+      <Title>
         {emoji}
-        <span className="font-black text-5xl ml-4">{hotDogsEaten - 1}</span>
-      </h2>
+        <Count>{hotDogsEaten - 1}</Count>
+      </Title>
       <HotDog bites={currentHotDogBites} />
     </Card>
   )
@@ -25,4 +25,16 @@ const Card = tw.div`
   rounded-md
   p-4
   pr-0
+`
+
+const Title = tw.h2`
+  flex
+  items-center
+  text-7xl
+`
+
+const Count = tw.span`
+  font-black
+  text-5xl
+  ml-4
 `

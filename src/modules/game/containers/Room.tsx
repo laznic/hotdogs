@@ -47,7 +47,7 @@ export default function Room() {
   return (
     <>
       {showJoinLinkModal && !gameStarted && <JoinLinkModal isOpen={showJoinLinkModal} toggleModal={toggleJoinLinkModal}  />}
-      <section className="grid gap-12 items-center mx-auto justify-center">
+      <Wrapper>
         <div className="max-w-sm mx-auto text-center">
           <MyPlayerCard emoji={emoji} setEmoji={setEmoji} gameStarted={gameStarted} />
           {!gameStarted && gameStatus !== 'STARTING' && (
@@ -75,25 +75,37 @@ export default function Room() {
           )}
 
           {gameStatus === 'STARTING' && (
-            <span className="text-center text-9xl font-black text-white drop-shadow-xl">
-              {countdown}
-            </span>
+            <>
+              <span className="text-xs text-white mt-8">Game starting in</span>
+              <br />
+              <CountDownText>
+                {countdown}
+              </CountDownText>
+            </>
           )}
 
           {gameStatus === 'IN_PROGRESS' && (
-            <span className="text-center text-9xl font-black text-white drop-shadow-xl">
+            <CountDownText>
               {seconds}
-            </span>
+            </CountDownText>
           )}
         </div>
 
-        <div className="flex flex-wrap sm:flex-nowrap justify-evenly sm:w-1/2 xl:w-3/4 mx-auto">
-          {!participants.filter((participant) => !isMe(participant.user_id, participant.id)).length && <span className="text-rose-700">Waiting for other players</span> }
+        <PlayerCards>
+          {!participants.filter((participant) => !isMe(participant.user_id, participant.id)).length && (
+            <span className="text-rose-700">Waiting for other players</span>
+          )}
+
           {participants.filter((participant) => !isMe(participant.user_id, participant.id)).map((participant) => (
-            <OtherPlayerCard key={participant.id} id={participant.id} username={participant.username} hotDogs={participant.hotdogs} ready={participant.ready} />
+            <OtherPlayerCard 
+              key={participant.id} 
+              id={participant.id} 
+              username={participant.username} 
+              hotDogs={participant.hotdogs} 
+              ready={participant.ready} />
           ))}
-        </div>
-      </section>
+        </PlayerCards>
+      </Wrapper>
     </>
   )
 }
@@ -124,4 +136,30 @@ const StartGameButton = tw.button`
   hover:-translate-y-1
   hover:shadow-xl
   transition-all
+`
+
+const Wrapper = tw.section`
+  grid
+  gap-12
+  items-center
+  mx-auto
+  justify-center
+`
+
+const PlayerCards = tw.div`
+  flex
+  flex-wrap
+  sm:flex-nowrap
+  justify-evenly
+  sm:w-1/2
+  xl:w-3/4
+  mx-auto
+`
+
+const CountDownText = tw.span`
+  text-center
+  text-9xl
+  font-black
+  text-white
+  drop-shadow-xl
 `

@@ -37,18 +37,17 @@ export default function CreateGameModal ({ isOpen }: CreateGameModalProps) {
       <Backdrop />
       <Modal ref={modalRef} open={isOpen}>
         <section>
-          <h2 className="font-bold text-xl mb-4 pb-4 text-center">Game finished!</h2>
+          <Title>Game finished!</Title>
 
-          <section className="grid gap-4 mb-4 text-center">
-            <span className="grid items-center justify-center text-4xl font-black text-amber-500">
+          <ModalBody>
+            <ModalContent>
               🏆
               <span>{winningPlayer.username ? winningPlayer.username : `Anon ${winningPlayer.id}`} wins</span>
               <span className="text-sm text-amber-500">They ate {winningPlayer.hotdogs.filter((hotdog) => hotdog.finished).length} hot dogs!</span>
-            </span>
+            </ModalContent>
 
             <LeaveGameButton onClick={leaveGame}>Leave game</LeaveGameButton>
-          </section>
-
+          </ModalBody>
         </section>
       </Modal>
     </>
@@ -79,6 +78,31 @@ const Modal = tw.dialog`
   -translate-y-1/2
   shadow-2xl
   text-left
+`
+
+const Title = tw.h2`
+  font-bold
+  text-xl
+  mb-4
+  border-b
+  pb-4
+  text-center
+`
+
+const ModalBody = tw.section`
+  grid
+  gap-4
+  mb-4
+  text-center
+`
+
+const ModalContent = tw.div`
+  grid
+  items-center
+  justify-center
+  text-4xl
+  font-black
+  text-amber-500
 `
 
 const LeaveGameButton = tw.button`

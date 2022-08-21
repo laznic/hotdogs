@@ -67,21 +67,21 @@ export default function CreateGameModal ({ toggleModal, isOpen }: CreateGameModa
     <>
       <Backdrop />
       <Modal ref={modalRef} open={isOpen}>
-        <h2 className="font-bold text-xl mb-4 border-b pb-4">Create a game</h2>
+        <Title>Create a game</Title>
 
-        <section className="grid gap-4 mb-4">
-          <div className="flex items-center gap-4 justify-between">
-            <span className="flex-grow flex flex-col">
+        <ModalBody>
+          <InputWrapper>
+            <FlexCol>
               <span className="text-sm font-medium text-gray-900 mr-2">Max. players</span>
               <span className="text-sm text-gray-500">
                 You can have up to 5 players in one game.
               </span>
-            </span>
+            </FlexCol>
             <MaxPlayersInput type="number" placeholder="2" min={1} max={5} onChange={handleMaxPlayerCount} value={maxPlayers}/>
-          </div>
+          </InputWrapper>
 
-          <div className="flex items-center gap-4 justify-between">
-            <span className="flex-grow flex flex-col">
+          <InputWrapper>
+            <FlexCol>
               <span className="text-sm font-medium text-gray-900">
                 Private game
               </span>
@@ -94,14 +94,14 @@ export default function CreateGameModal ({ toggleModal, isOpen }: CreateGameModa
               <span className="text-xs text-gray-500 mt-2">
                 * join link with the token is presented to you after creating the game
               </span>
-            </span>
+            </FlexCol>
 
             <ToggleButton onClick={togglePrivacy} type="button" toggled={privateGame} role="switch" aria-checked="false" aria-labelledby="availability-label" aria-describedby="availability-description">
               <ToggleButtonHandle toggled={privateGame} aria-hidden="true"></ToggleButtonHandle>
             </ToggleButton>
-          </div>
+          </InputWrapper>
 
-          {error && <span className="text-xs text-red-500">Error occured when creating a room, try again.</span>}
+          {error && <ErrorMessage>Error occured when creating a room, try again.</ErrorMessage>}
           
           <CreateGameButton onClick={createRoom}>
             {creating && (
@@ -113,7 +113,7 @@ export default function CreateGameModal ({ toggleModal, isOpen }: CreateGameModa
 
             Create
           </CreateGameButton>
-        </section>
+        </ModalBody>
       </Modal>
     </>
   )
@@ -185,6 +185,33 @@ const Modal = tw.dialog`
   text-left
 `
 
+const Title = tw.h2`
+  font-bold
+  text-xl
+  mb-4
+  border-b
+  pb-4
+`
+
+const ModalBody = tw.section`
+  grid
+  gap-4
+  mb-4
+`
+
+const InputWrapper = tw.div`
+  flex
+  items-center
+  gap-4
+  justify-between
+`
+
+const FlexCol = tw.div`
+  flex-grow
+  flex
+  flex-col
+`
+
 const MaxPlayersInput = tw.input`
   rounded-xl
   w-16
@@ -209,4 +236,9 @@ const CreateGameButton = tw.button`
   text-violet-50
   transition-all
   active:bg-violet-700
+`
+
+const ErrorMessage = tw.span`
+  text-xs
+  text-red-500
 `

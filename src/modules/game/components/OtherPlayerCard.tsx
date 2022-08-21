@@ -13,9 +13,9 @@ export default function OtherPlayerCard({ hotDogs, ready, username, id }: OtherP
   return (
     <Card ready={ready}>
       <FaceBlock hotDogsEaten={hotDogs?.length || 1} emoji={''} />
-      <span className="bg-sky-500 text-sky-50 font-extrabold w-full flex justify-center py-2 mt-4 rounded">
+      <NameBlock>
         {username ? `@${username}` : `Anon ${id}`}
-      </span>
+      </NameBlock>
     </Card>
   )
 }
@@ -39,3 +39,15 @@ const Card = styled.div(({ ready }: { ready: boolean }) => [
   `,
   ready && tw`ring-8 ring-violet-500 border-transparent border-4 after:content-['Ready'] after:inline-flex after:text-violet-500 after:translate-y-2 text-center text-xl font-black`
 ])
+
+const NameBlock = tw.span`
+  bg-sky-500
+  text-sky-50
+  font-extrabold
+  w-full
+  flex
+  justify-center
+  py-2
+  mt-4
+  rounded
+`
