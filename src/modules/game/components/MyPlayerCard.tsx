@@ -23,7 +23,7 @@ const hotDogBase = { bites: 0, finished: false }
 export default function MyPlayerCard({ setEmoji, emoji, gameStarted, myPlayerId }: MyPlayerCardProps) {
   const videoElement = useRef<HTMLVideoElement>(null)
   const mouthState = useRef('closed')
-  const [hotDogs, setHotDogs] = useState([hotDogBase])
+  const [hotDogs, setHotDogs] = useState<{ bites: number, finished: boolean }[]>([])
   const currentDogIndex = useRef(0)
 
   const { client } = useSupabase()
@@ -60,14 +60,15 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted, myPlayerId 
               if (finished) {
                 updatedDogs = append(hotDogBase, updatedDogs)
                 currentDogIndex.current = currentDogIndex.current + 1
+
+                await client.from('games_players').update({
+                    hotdogs: updatedDogs 
+                  })
+                  .match({ id: myPlayerId, game: params?.id })
               }
   
               setHotDogs(updatedDogs)
-              await client.from('games_players').update({
-                  hotdogs: updatedDogs 
-                })
-                .match({ id: myPlayerId, game: params?.id })
-              }
+            }
           }
         }
       }
