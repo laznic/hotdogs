@@ -1,155 +1,34 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom';
-import addSeconds from 'date-fns/addSeconds'
-import { useTimer } from 'react-timer-hook'
+import React, { useState } from 'react'
+
 import tw from 'twin.macro'
 import { useSupabase } from '../../../contexts/SupabaseContext';
 import MyPlayerCard from "../components/MyPlayerCard";
 import JoinLinkModal from '../components/JoinLinkModal';
 import OtherPlayerCard from '../components/OtherPlayerCard';
 import GameCompleteModal from '../components/GameCompleteModal';
-import { Game, Player } from '../types';
+import useFetchGameAndPlayers from '../hooks/useFetchGameAndPlayers';
+import useHandleGameStates from '../hooks/useHandleGameStates';
+import useHandlePlayerStates from '../hooks/useHandlePlayerStates';
 
 export default function Room() {
-  const params = useParams()
-  const { client, rpcQuery, session } = useSupabase()
+  const { session } = useSupabase()
   const [emoji, setEmoji] = useState('😊')
-  const [participants, setParticipants] = useState<Player[]>([])
   const [gameStatus, setGameStatus] = useState('OPEN')
-  const [game, setGame] = useState<Game>()
-  const [myPlayerId, setMyPlayerId] = useState()
-  const now = useRef(new Date)
   const [showJoinLinkModal, setShowJoinLinkModal] = useState(false)
   const gameStarted = gameStatus === 'IN_PROGRESS'
-  const { seconds, restart: restartTimer } = useTimer({ expiryTimestamp: now.current, autoStart: false })
-  const { seconds: countdown, restart: restartCountdown } = useTimer({ expiryTimestamp: now.current, autoStart: false })
-  const navigate = useNavigate()
-  const [disableLeaving, setDisableLeaving] = useState(true)
-  const createdByMe = game?.created_by === session?.user?.id
   
+  const { game, participants, fetchPlayers } = useFetchGameAndPlayers(setGameStatus)
+  const { seconds, countdown, disableLeaving, startGameCountdown } = useHandleGameStates(gameStatus, setGameStatus)
+  const { myPlayerId } = useHandlePlayerStates(game, gameStatus, disableLeaving, fetchPlayers)
+  
+  const createdByMe = game?.created_by === session?.user?.id
+
   function isMe (userId: string, playerId: string | number) {
     return userId === session?.user?.id || playerId === myPlayerId
   }
 
-  function handleGameState (payload: { new: Game }) {
-    if (payload.new.status === 'STARTING') {
-      const countdownSeconds = addSeconds(new Date(), 5)
-      restartCountdown(countdownSeconds, true)
-    }
-
-    if (payload.new.status === 'IN_PROGRESS') {
-      const gameSeconds = addSeconds(new Date(), 15)
-      restartTimer(gameSeconds, true)
-    }
-
-    setGameStatus(payload.new.status)
-  }
-
-  async function endGame() {
-    await rpcQuery('end_game', { id: params?.id })
-  }
-
-  useEffect(function handleEndGame() {
-    if (seconds === 0 && gameStatus === 'IN_PROGRESS') {
-      endGame()
-    }
-  }, [seconds, gameStatus])
-
-  async function startGame () {
-    await rpcQuery('start_game', { id: params?.id })
-  }
-
-  async function startGameCountdown () {
-    setDisableLeaving(true)
-    await rpcQuery('start_game_countdown', { id: params?.id })
-  }
-
-  useEffect(function removeSubscriptions () {
-    fetchGame()
-
-    client.from(`games_players:game=eq.${params?.id}`)
-      .on('INSERT', fetchPlayers)
-      .on('UPDATE', fetchPlayers)
-      .on('DELETE', fetchPlayers)
-      .subscribe()
-
-    client.from(`games:id=eq.${params?.id}`)
-      .on('UPDATE', handleGameState)
-      .subscribe()
-
-    return () => {
-      client.removeAllSubscriptions()
-    }
-  }, [])
-
-  async function joinGame () {
-    const { data, error } = await rpcQuery('join_game', { id: params?.id })
-
-    if (!error) {
-      setMyPlayerId(data)
-      fetchPlayers()
-    }
-  }
-
-  async function leaveGame () {
-    await rpcQuery('leave_game', { id: myPlayerId })
-  }
-
-  const startingInProgressOrDone = ['STARTING', 'IN_PROGRESS', 'FINISHED'].some(status => status === gameStatus)
-
-  useEffect(function handleGameJoining () {
-    if (game && !myPlayerId) {
-      if (game.private && !params?.code) {
-        navigate('/', { replace: true })
-      }
-
-      if ((!game.private || (game.private && params?.code)) && !startingInProgressOrDone) {
-        joinGame()
-      } else {
-        navigate('/', { replace: true })
-      }
-    }
-
-    return () => {
-      if (myPlayerId && !disableLeaving) {
-        leaveGame()
-      }
-    }
-  }, [game, params?.code, myPlayerId, gameStatus, startingInProgressOrDone])
-
-  useEffect(function startGameCountdown() {
-    if (countdown === 0 && gameStatus === 'STARTING') {
-      startGame()
-    }
-  }, [countdown, gameStatus])
-
   function toggleJoinLinkModal () {
     setShowJoinLinkModal(!showJoinLinkModal)
-  }
-
-  async function fetchGame () {
-    const { data, error } = await client.from('games')
-      .select(`
-        id,
-        private,
-        status,
-        created_by
-      `)
-      .eq('id', params?.id)
-      .single()
-
-    if (!error) {
-      setGame(data)
-      setGameStatus(data.status)
-    }
-  }
-
-  async function fetchPlayers () {
-    const { data, error } = await rpcQuery('fetch_participants', { game_id: params?.id })
-
-    if (!error) {
-      setParticipants(data)
-    }
   }
 
   if (gameStatus === 'FINISHED') {
@@ -186,7 +65,7 @@ export default function Room() {
                 Check that your camera works by opening and closing your mouth: the emoji should react when you do so.
                 {createdByMe && (
                   <>
-                    When everyone is ready,
+                    &nbsp;When everyone is ready,
                     <br />
                     <StartGameButton onClick={startGameCountdown}>start the game.</StartGameButton>
                   </>
