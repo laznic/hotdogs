@@ -27,7 +27,7 @@ export default function Leaderboard () {
     <div className="grid items-center justify-center pt-24">
         <section className="rounded-lg bg-rose-50 p-8 border border-white shadow-xl w-96">
           <h1 className="text-4xl font-black">Leaderboard</h1>
-          <p className="text-sm">Players with the most eaten hot dogs</p>
+          <p className="text-sm">Players with number of hot dogs they've eaten so far</p>
 
           <ul className="w-full overflow-hidden mt-4 gap-2">
             {loading && (
