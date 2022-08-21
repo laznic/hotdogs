@@ -1,9 +1,9 @@
 import React from 'react'
-import { Outlet, NavLink } from "react-router-dom";
-import tw, {css} from 'twin.macro'
+import { Outlet, NavLink, Link } from "react-router-dom";
+import tw from 'twin.macro'
 import BgPattern from '../../../assets/bg-pattern.svg'
 import { useSupabase } from '../../../contexts/SupabaseContext';
-
+import GitHubLogo from '../../../assets/github-logo.png'
 
 export default function Layout() {
   const { client, session } = useSupabase()
@@ -28,9 +28,16 @@ export default function Layout() {
         </NavLinks>
         {session && <button onClick={handleLogout}>Logout</button>}
       </Nav>
+
       <Main>
         <Outlet />
       </Main>
+
+      <Footer>
+        <a className="hover:opacity-100 opacity-25" href="https://github.com/laznic/hotdogs" target="_blank" rel="noopener noreferrer">
+          <img src={GitHubLogo} alt="GitHub Logo" />
+        </a>
+      </Footer>
     </>
   );
 }
@@ -78,4 +85,12 @@ const Main = tw.main`
   relative
   py-8
   z-10
+`
+
+const Footer = tw.footer`
+  relative
+  flex
+  justify-center
+  items-center
+  z-20
 `
