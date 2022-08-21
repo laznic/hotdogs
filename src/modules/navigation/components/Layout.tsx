@@ -1,21 +1,29 @@
 import React from 'react'
 import { Outlet, Link } from "react-router-dom";
 import tw from 'twin.macro'
+import BgPattern from '../../../assets/bg-pattern.svg'
+
 
 export default function Layout() {
   return (
     <>
-      <Outlet />
+      <Background style={{ backgroundImage: `url(${BgPattern})` }} />
+      <Wrapper>
+        <Outlet />
+      </Wrapper>
     </>
   );
 }
 
-const Nav = tw.nav``
-const NavLinks = tw.ul`
-  flex
-  items-center
+const Background = tw.div`
+  absolute
+  w-full
+  h-screen
+  bg-no-repeat
+  top-0
+
 `
-const Logo = tw(Link)`
-  lg:text-5xl
-  text-4xl
+const Wrapper = tw.div`
+  relative
+  z-10
 `

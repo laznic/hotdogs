@@ -48,16 +48,22 @@ export default function Home() {
   return (
     <div className="text-center">
       <MainTitle>
-        <span className="block text-center mb-4">😄🌭</span>
-        The Hot Dog Game
+        <span className="block text-center mb-8">😄🌭</span>
+        Eat as many hot dogs
+        <br />
+        as you can
+        <br />
+        <span className="text-white">in 15 seconds.</span>
       </MainTitle>
 
-      <p className="mb-4">
-        The rules are simple: 
-        <span className="font-bold">
-          &nbsp;eat as many hot dogs as you can in 15 seconds.
-        </span>
-      </p>
+      <section className="p-4 rounded-md bg-rose-400 w-fit mx-auto text-left text-rose-900 my-8 border border-rose-500">
+        <p className="text-center font-bold">How it works</p>
+        <ol className="list-decimal ml-4">
+          <li>Create or join a game</li>
+          <li>Allow access to your camera</li>
+          <li>Open and close mouth to eat hot dogs</li>
+        </ol>
+      </section>
 
       {session && <CreateGameButton onClick={toggleCreateModal}>
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-4" viewBox="0 0 20 20" fill="currentColor">
@@ -141,7 +147,7 @@ const MainTitle = tw.h1`
   text-6xl
   font-black
   text-rose-900
-  mb-4
+  my-8
 `
 
 const SecondaryTitle = tw.h2`
