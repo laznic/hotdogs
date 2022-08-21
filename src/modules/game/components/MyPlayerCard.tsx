@@ -15,12 +15,14 @@ interface MyPlayerCardProps {
   setEmoji: (emoji: string) => void
   emoji: string
   gameStarted: boolean
+  myPlayerId: number | string
 }
 
-export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerCardProps) {
+const hotDogBase = { bites: 0, finished: false }
+
+export default function MyPlayerCard({ setEmoji, emoji, gameStarted, myPlayerId }: MyPlayerCardProps) {
   const videoElement = useRef<HTMLVideoElement>(null)
   const mouthState = useRef('closed')
-  const hotDogBase = { bites: 0, finished: false }
   const [hotDogs, setHotDogs] = useState([hotDogBase])
   const currentDogIndex = useRef(0)
 
@@ -29,7 +31,7 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerC
   const params = useParams()
 
   async function onPlay () {
-      const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 })
+      const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.4 })
       const result = await faceapi.detectSingleFace(videoElement.current as faceapi.TNetInput, options).withFaceLandmarks(true)
 
       if (result) {
@@ -64,7 +66,7 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerC
               await client.from('games_players').update({
                   hotdogs: updatedDogs 
                 })
-                .match({ user_id: session?.user?.id, game: params?.id })
+                .match({ id: myPlayerId, game: params?.id })
               }
           }
         }
