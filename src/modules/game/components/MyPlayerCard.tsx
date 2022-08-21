@@ -29,7 +29,7 @@ export default function MyPlayerCard({ setEmoji, emoji, gameStarted }: MyPlayerC
   const params = useParams()
 
   async function onPlay () {
-      const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 })
+      const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.4 })
       const result = await faceapi.detectSingleFace(videoElement.current as faceapi.TNetInput, options).withFaceLandmarks(true)
 
       if (result) {
