@@ -40,6 +40,7 @@ Some features that were left out from the first release to be able to finish it 
 - Direct SoMe sharing with a dynamic graphic
 - Animations / transitions
 - Live web cam feeds from all players (maybe via [Daily](https://daily.co)?)
+- General performance improvements and other adjustments
 
 ## The team / contributors
 - laznic ([GitHub](https://github.com/laznic), [Twitter](https://twitter.com/laznic))
