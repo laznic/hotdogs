@@ -41,7 +41,7 @@ const Background = tw.div`
   h-screen
   bottom-0
   bg-no-repeat
-  top-24
+  top-8
   overflow-hidden
 `
 
