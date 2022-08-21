@@ -1,8 +1,8 @@
-// @ts-nocheck
 import React, { useState, useEffect, useRef, } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import tw from 'twin.macro'
 import { useSupabase } from '../../../contexts/SupabaseContext'
+import { Player } from '../types'
 
 interface CreateGameModalProps {
   isOpen: boolean
@@ -12,7 +12,7 @@ export default function CreateGameModal ({ isOpen }: CreateGameModalProps) {
   const modalRef = useRef(null)
   const navigate = useNavigate()
   const { rpcQuery } = useSupabase()
-  const [winningPlayer, setWinningPlayer] = useState(null)
+  const [winningPlayer, setWinningPlayer] = useState<Player>()
   const params = useParams()
 
   async function fetchWinningPlayer () {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 import addSeconds from 'date-fns/addSeconds'
@@ -9,14 +8,15 @@ import MyPlayerCard from "./MyPlayerCard";
 import JoinLinkModal from './JoinLinkModal';
 import OtherPlayerCard from './OtherPlayerCard';
 import GameCompleteModal from './GameCompleteModal';
+import { Game, Player } from '../types';
 
 export default function Room() {
   const params = useParams()
   const { client, rpcQuery, session } = useSupabase()
   const [emoji, setEmoji] = useState('😊')
-  const [participants, setParticipants] = useState([])
+  const [participants, setParticipants] = useState<Player[]>([])
   const [gameStatus, setGameStatus] = useState('OPEN')
-  const [game, setGame] = useState()
+  const [game, setGame] = useState<Game>()
   const [myPlayerId, setMyPlayerId] = useState()
   const now = useRef(new Date)
   const [showJoinLinkModal, setShowJoinLinkModal] = useState(false)
@@ -25,13 +25,13 @@ export default function Room() {
   const { seconds: countdown, restart: restartCountdown } = useTimer({ expiryTimestamp: now.current, autoStart: false })
   const navigate = useNavigate()
   const [disableLeaving, setDisableLeaving] = useState(true)
-  const createdByMe = game?.created_by === session?.user.id
+  const createdByMe = game?.created_by === session?.user?.id
   
-  function isMe (userId: string, playerId: string) {
-    return userId === session?.user.id || playerId === myPlayerId
+  function isMe (userId: string, playerId: string | number) {
+    return userId === session?.user?.id || playerId === myPlayerId
   }
 
-  function handleGameState (payload: Record<string, unknown>) {
+  function handleGameState (payload: { new: Game }) {
     if (payload.new.status === 'STARTING') {
       const countdownSeconds = addSeconds(new Date(), 5)
       restartCountdown(countdownSeconds, true)
@@ -211,7 +211,7 @@ export default function Room() {
         <div className="flex flex-wrap sm:flex-nowrap justify-evenly sm:w-1/2 xl:w-3/4 mx-auto">
           {!participants.filter((participant) => !isMe(participant.user_id, participant.id)).length && <span className="text-rose-700">Waiting for other players</span> }
           {participants.filter((participant) => !isMe(participant.user_id, participant.id)).map((participant) => (
-            <OtherPlayerCard key={participant.id} id={participant.id} username={participant.username} hotDogs={participant.hotdogs} ready={participant.ready} gameStarted={gameStarted} />
+            <OtherPlayerCard key={participant.id} id={participant.id} username={participant.username} hotDogs={participant.hotdogs} ready={participant.ready} />
           ))}
         </div>
       </section>

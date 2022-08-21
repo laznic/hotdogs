@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import tw from 'twin.macro'
@@ -6,10 +5,11 @@ import tw from 'twin.macro'
 import { useSupabase } from '../../../contexts/SupabaseContext'
 import LoginModal from '../../auth/components/LoginModal'
 import CreateGameModal from '../../game/components/CreateGameModal'
+import { Game } from '../../game/types'
 
 export default function Home() {
   const { client, session } = useSupabase()
-  const [publicGames, setPublicGames] = useState([])
+  const [publicGames, setPublicGames] = useState<Game[]>([])
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -34,7 +34,7 @@ export default function Home() {
     }
     
     setLoading(false)
-    setPublicGames(data)
+    setPublicGames(data  ?? [])
   }
 
   useEffect(() => {
@@ -79,8 +79,8 @@ export default function Home() {
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
           }
-          {!loading && !publicGames.filter((game) => game.players.length < game.max_player_count).length && <p className="text-rose-800">No public games available.</p>}
-          {!loading && publicGames.filter((game) => game.players.length < game.max_player_count).map((game) => {
+          {!loading && !publicGames.filter((game) => game.players?.length < game.max_player_count).length && <p className="text-rose-800">No public games available.</p>}
+          {!loading && publicGames.filter((game) => game.players?.length < game.max_player_count).map((game) => {
             return (
               <GameListItem key={game.id}>
                 <div className="flex items-center flex-wrap">
