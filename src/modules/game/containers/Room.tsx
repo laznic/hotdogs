@@ -49,7 +49,7 @@ export default function Room() {
       {showJoinLinkModal && !gameStarted && <JoinLinkModal isOpen={showJoinLinkModal} toggleModal={toggleJoinLinkModal}  />}
       <Wrapper>
         <div className="max-w-sm mx-auto text-center">
-          <MyPlayerCard emoji={emoji} setEmoji={setEmoji} gameStarted={gameStarted} />
+          <MyPlayerCard emoji={emoji} setEmoji={setEmoji} gameStarted={gameStarted} myPlayerId={myPlayerId} />
           {!gameStarted && gameStatus !== 'STARTING' && (
             <>
               {createdByMe && (
