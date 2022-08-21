@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useSupabase } from "../../../contexts/SupabaseContext"
 
 export default function Leaderboard () {
-  const [leaderboard, setLeaderboard] = useState([])
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(false)
   const { client } = useSupabase()
 
@@ -16,7 +16,7 @@ export default function Leaderboard () {
     }
     
     setLoading(false)
-    setLeaderboard(data)
+    setLeaderboard(data ?? [])
   }
 
   useEffect(() => {
@@ -25,7 +25,6 @@ export default function Leaderboard () {
 
   return (
     <div className="grid items-center justify-center pt-24">
-        
         <section className="rounded-lg bg-rose-50 p-8 border border-white shadow-xl w-96">
           <h1 className="text-4xl font-black">Leaderboard</h1>
           <p className="text-sm">Players with the most eaten hot dogs</p>
@@ -53,4 +52,9 @@ export default function Leaderboard () {
         </section>
     </div>
   )
+}
+
+type LeaderboardEntry = {
+  username: string
+  finished_hotdogs: number
 }
