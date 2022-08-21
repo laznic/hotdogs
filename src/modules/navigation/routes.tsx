@@ -1,4 +1,4 @@
-import Room from "../game/components/Room";
+import Room from "../game/containers/Room";
 import Home from "../home/components/Home";
 import Layout from "./components/Layout";
 import NoMatch from "./components/NoMatch";

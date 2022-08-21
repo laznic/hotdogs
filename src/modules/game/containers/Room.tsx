@@ -4,10 +4,10 @@ import addSeconds from 'date-fns/addSeconds'
 import { useTimer } from 'react-timer-hook'
 import tw from 'twin.macro'
 import { useSupabase } from '../../../contexts/SupabaseContext';
-import MyPlayerCard from "./MyPlayerCard";
-import JoinLinkModal from './JoinLinkModal';
-import OtherPlayerCard from './OtherPlayerCard';
-import GameCompleteModal from './GameCompleteModal';
+import MyPlayerCard from "../components/MyPlayerCard";
+import JoinLinkModal from '../components/JoinLinkModal';
+import OtherPlayerCard from '../components/OtherPlayerCard';
+import GameCompleteModal from '../components/GameCompleteModal';
 import { Game, Player } from '../types';
 
 export default function Room() {
