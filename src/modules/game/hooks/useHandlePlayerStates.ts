@@ -25,6 +25,10 @@ export default function useHandlePlayerStates (game: Game | undefined, gameStatu
     await rpcQuery('leave_game', { id: myPlayerId })
   }
 
+  async function markReady () {
+    await rpcQuery('mark_player_ready', { id: myPlayerId, game_id: params?.id })
+  }
+
   useEffect(function handleGameJoining () {
     if (game && !myPlayerId) {
       if (privateButNoCode) {
@@ -45,5 +49,5 @@ export default function useHandlePlayerStates (game: Game | undefined, gameStatu
     }
   }, [game, privateButNoCode, myPlayerId, disableLeaving, startingInProgressOrDone])
 
-  return { myPlayerId }
+  return { myPlayerId, markReady }
 }

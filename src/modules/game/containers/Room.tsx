@@ -19,9 +19,10 @@ export default function Room() {
   
   const { game, participants, fetchPlayers } = useFetchGameAndPlayers(setGameStatus)
   const { seconds, countdown, disableLeaving, startGameCountdown } = useHandleGameStates(gameStatus, setGameStatus)
-  const { myPlayerId } = useHandlePlayerStates(game, gameStatus, disableLeaving, fetchPlayers)
+  const { myPlayerId, markReady } = useHandlePlayerStates(game, gameStatus, disableLeaving, fetchPlayers)
   
   const createdByMe = game?.created_by === session?.user?.id
+  const mePlayer = participants.find(participant => isMe(participant.user_id, participant.id))
 
   function isMe (userId: string, playerId: string | number) {
     return userId === session?.user?.id || playerId === myPlayerId
@@ -63,11 +64,26 @@ export default function Room() {
 
               <p className="text-rose-900 font-semibold text-center mt-4">
                 Check that your camera works by opening and closing your mouth: the emoji should react when you do so.
-                {createdByMe && (
+                {createdByMe ? (
                   <>
                     &nbsp;When everyone is ready,
                     <br />
                     <StartGameButton onClick={startGameCountdown}>start the game.</StartGameButton>
+                  </>
+                ) : (
+                  <>
+                    &nbsp;When you are done,
+                    <br />
+                    <MarkReadyButton onClick={markReady}> mark yourself ready.</MarkReadyButton>
+
+                    {mePlayer?.ready && (
+                      <span className="text text-sky-700 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        You're ready
+                      </span>
+                    )}
                   </>
                 )}
               </p>
@@ -122,6 +138,23 @@ const ShowJoinCodeButton = tw.button`
 `
 
 const StartGameButton = tw.button`
+  rounded
+  bg-violet-500
+  text-white
+  border
+  border-violet-600
+  px-4
+  py-2
+  mt-4
+  mb-6
+  font-bold
+  shadow-lg
+  hover:-translate-y-1
+  hover:shadow-xl
+  transition-all
+
+`
+const MarkReadyButton = tw.button`
   rounded
   bg-violet-500
   text-white
